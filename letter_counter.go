@@ -143,6 +143,13 @@ func getScore(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func counting(s *discordgo.Session, m *discordgo.MessageCreate) {
+	var userScore map[string]int
+	var prevLvl string
+	var nextLvl string
+	var err error
+	userScore, err = score.ReadUserScore(m.Author)
+	prevLvl = score.CalculateLevel(userScore["msg"])
+	fmt.Print(userScore,"\n")
 	messageLength := len(m.Content)
 
 	channel, _ := s.Channel(m.ChannelID)
@@ -170,7 +177,13 @@ func counting(s *discordgo.Session, m *discordgo.MessageCreate) {
 		"\033[0m",
 		".\n",
 	)
-
+	fmt.Print(prevLvl,"  Previous level \n")
+	err = score.SaveMessageScore(m.Author, messageLength)
+	fmt.Print(err,"\n")
+	userScore, err = score.ReadUserScore(m.Author)
+	nextLvl = score.CalculateLevel(userScore["msg"])
+	fmt.Print(nextLvl,"\n")
+	response := ("Congratz on leveling up, you are now lvl :"+ nextLvl)
 	err := score.SaveMessageScore(m.Author, messageLength)
 	if err != nil {
 		displayError(err)
